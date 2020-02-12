@@ -62,7 +62,7 @@ func main() {
 					case 200:
 						log.Println(fmt.Sprintf("URL %s is up, nothing to do.", monitoredURL))
 					default:
-						log.Println(fmt.Sprintf("URL %s is not up (code %s), notifying", monitoredURL, statusCode))
+						log.Println(fmt.Sprintf("URL %s is not up (code %d), notifying", monitoredURL, statusCode))
 						notifier.Notify(monitoredURL, statusCode)
 					}
 				}
