@@ -7,7 +7,7 @@ RUN ls -la $GOPATH/src/checker
 
 RUN apk update && apk add --no-cache git
 
-RUN adduser -D -g '' twittercheck
+RUN adduser -D -g '' checker
 
 RUN go get -d -v
 RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-w" -o /go/bin/checker
@@ -24,7 +24,7 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certifi
 # We copy the binary from the builder
 COPY --from=builder /go/bin/checker /go/bin/checker
 
-USER twittercheck
+USER checker
 
 # Run the binary.
 ENTRYPOINT ["/go/bin/checker"]

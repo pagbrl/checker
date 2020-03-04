@@ -16,7 +16,7 @@ type Environment struct {
 }
 
 type Notifier interface {
-	Notify(twitterHandle string, statusCode int) bool
+	Notify(message string) bool
 }
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 	}
 
 	var e Environment
-	err = envconfig.Process("checktwitterhandle", &e)
+	err = envconfig.Process("checker", &e)
 	if err != nil {
 		log.Fatalf("envconfig.Process: %w", err)
 	}
@@ -57,13 +57,27 @@ func main() {
 				notifier := getNotifier(notifierParameter)
 
 				for _, monitoredURL := range e.MonitoredURLs {
-					statusCode = getMonitoredUrlStatusCode(monitoredURL)
-					switch statusCode {
+					log.Println(fmt.Sprintf("Visiting %v", monitoredURL))
+					resp, err := http.Get(monitoredURL)
+					if err != nil {
+						log.Println(fmt.Sprintf("Could not connect to url %s : %s", monitoredURL, err))
+						statusCode = 0
+					} else {
+						log.Println(fmt.Sprintf("Response for url %s : %d", monitoredURL, resp.StatusCode))
+						statusCode = resp.StatusCode
+					}
+
+					switch resp.StatusCode {
 					case 200:
 						log.Println(fmt.Sprintf("URL %s is up, nothing to do.", monitoredURL))
+					case 0:
+						log.Println(fmt.Sprintf("URL %s is not up (connection error), notifying", monitoredURL))
+						message := fmt.Sprintf(":warning: Alert, site %s looks down (connection error : %s) ! :warning:", monitoredURL, err)
+						notifier.Notify(message)
 					default:
 						log.Println(fmt.Sprintf("URL %s is not up (code %d), notifying", monitoredURL, statusCode))
-						notifier.Notify(monitoredURL, statusCode)
+						message := fmt.Sprintf(":warning: Alert, site %s looks down (status code %d) ! :warning:", monitoredURL, statusCode)
+						notifier.Notify(message)
 					}
 				}
 				return nil
@@ -77,7 +91,7 @@ func main() {
 				log.Println("Sending test message")
 
 				notifier := getNotifier(notifierParameter)
-				notifier.Notify("test", 404)
+				notifier.Notify(":warning: Alert, this is a test message for checker !! :warning:")
 				return nil
 			},
 		},
@@ -89,18 +103,6 @@ func main() {
 	}
 }
 
-func getMonitoredUrlStatusCode(monitoredURL string) int {
-
-	log.Println(fmt.Sprintf("Visiting %v", monitoredURL))
-	resp, err := http.Get(monitoredURL)
-	if err != nil {
-		log.Println(fmt.Sprintf("Could not connect to url %s : %s", monitoredURL, err))
-		return 0
-	}
-
-	log.Println(fmt.Sprintf("Response for url %s : %d", monitoredURL, resp.StatusCode))
-	return resp.StatusCode
-}
 
 func getNotifier(notifierParameter string) (Notifier) {
 

@@ -37,18 +37,17 @@ func makeSlackNotifier() SlackNotifier {
 	return SlackNotifier{SlackToken: env.SlackToken, SlackChannel: env.SlackChannel}
 }
 
-func (notifier SlackNotifier) Notify(monitoredURL string, statusCode int) bool {
-	var slackMessage = notifier.GetNotificationMessage(monitoredURL, statusCode)
+func (notifier SlackNotifier) Notify(message string) bool {
+	var slackMessage = notifier.GetNotificationMessage(message)
 	notifier.SendMessage(slackMessage)
 
 	return true
 }
 
-func (notifier SlackNotifier) GetNotificationMessage(monitoredURL string, statusCode int) SlackMessage {
+func (notifier SlackNotifier) GetNotificationMessage(message string) SlackMessage {
 	var slackMessage SlackMessage
-	messageString := fmt.Sprintf(":warning: Alert, site %s looks down (status code %d) ! :warning:", monitoredURL, statusCode)
 
-	slackMessage.Text = messageString
+	slackMessage.Text = message
 	slackMessage.Channel = notifier.SlackChannel
 
 	return slackMessage
