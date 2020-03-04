@@ -94,7 +94,8 @@ func getMonitoredUrlStatusCode(monitoredURL string) int {
 	log.Println(fmt.Sprintf("Visiting %v", monitoredURL))
 	resp, err := http.Get(monitoredURL)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(fmt.Sprintf("Could not connect to url %s : %s", monitoredURL, err))
+		return 0
 	}
 
 	log.Println(fmt.Sprintf("Response for url %s : %d", monitoredURL, resp.StatusCode))
