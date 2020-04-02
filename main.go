@@ -34,8 +34,8 @@ func main() {
 	}
 
 	app := cli.NewApp()
-	app.Name = "check-twitter-handle"
-	app.Usage = "Check if a specific twitter handle is available"
+	app.Name = "checker"
+	app.Usage = "Check if URLs are up"
 
 	app.Flags = []cli.Flag {
 		&cli.StringFlag{
@@ -50,7 +50,7 @@ func main() {
 		{
 			Name:    "check",
 			Aliases: []string{"c"},
-			Usage:   "check if twitter handle is available",
+			Usage:   "check if URLs are up",
 			Action: func(c *cli.Context) error {
 				var statusCode int
 
@@ -67,7 +67,7 @@ func main() {
 						statusCode = resp.StatusCode
 					}
 
-					switch resp.StatusCode {
+					switch statusCode {
 					case 200:
 						log.Println(fmt.Sprintf("URL %s is up, nothing to do.", monitoredURL))
 					case 0:
